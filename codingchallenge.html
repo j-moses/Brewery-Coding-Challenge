@@ -1,0 +1,54 @@
+<html>
+<head>
+    <style>
+	#map {
+		height: 100%;
+	}
+	html, body {
+		margin: 0;
+		padding: 0;
+	}
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script>
+        var map = null;
+        var markers = [];
+
+        function initMap() {
+            var californiaPosition = new google.maps.LatLng(36.7783, -119.4179);
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: californiaPosition,
+                zoom: 6,
+            });
+			loadData();
+        }
+		
+        function loadData() {
+            for (var i = 1; i < 20; i++){
+				$.getJSON("https://api.openbrewerydb.org/breweries?by_state=california&per_page=50&page=" + i, function(result){
+					$.each(result, function(key, item) {
+						var pos = new google.maps.LatLng(item.latitude, item.longitude);
+						var marker = new google.maps.Marker({
+							position: pos,
+							title: item.name
+						});
+							if(item.latitude != null){
+								marker.setMap(map);
+								var infowindow = new google.maps.InfoWindow({
+								content: item.name + '<br>' + item.street + ', ' + item.city + ', ' + item.state
+								});
+								google.maps.event.addListener(marker, 'click', function() {
+									infowindow.open(map,marker);
+								});
+							}
+					});
+				});
+			}
+		}
+   </script>
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async="defer"></script>
+</body>
+</html>
